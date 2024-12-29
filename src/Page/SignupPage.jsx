@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './SignupPage.css';
 
 function SignupPage() {
+  const [id, setId] = useState('');  // id 상태 추가
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -12,8 +13,7 @@ function SignupPage() {
       alert('비밀번호가 일치하지 않습니다.');
       return;
     }
-    // 회원가입 처리 로직 추가
-    console.log('Signing up with:', email, password);
+    console.log('Signing up with:', id, email, password);
   };
 
   return (
@@ -21,6 +21,17 @@ function SignupPage() {
       <div className="signup-container">
         <h2 className="signup-title">회원가입</h2>
         <form onSubmit={handleSubmit} className="signup-form">
+          <div className="input-group">
+            <label htmlFor="id" className="input-label">아이디</label>
+            <input
+              type="text"
+              id="id"
+              className="input-field"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              placeholder="아이디를 입력하세요"
+            />
+          </div>
           <div className="input-group">
             <label htmlFor="email" className="input-label">이메일</label>
             <input

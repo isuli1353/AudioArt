@@ -1,15 +1,14 @@
-// src/Page/LoginPage.jsx
 import React, { useState } from 'react';
-import './LoginPage.css'; // 별도로 스타일을 작성할 경우
+import './LoginPage.css';
 
 function LoginPage() {
+  const [id, setId] = useState('');  // id 상태 추가
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // 로그인 처리 로직 추가
-    console.log('Logging in with:', email, password);
+    console.log('Logging in with:', id, email, password);
   };
 
   return (
@@ -17,6 +16,17 @@ function LoginPage() {
       <div className="login-container">
         <h2 className="login-title">로그인</h2>
         <form onSubmit={handleSubmit} className="login-form">
+          <div className="input-group">
+            <label htmlFor="id" className="input-label">아이디</label>
+            <input
+              type="text"
+              id="id"
+              className="input-field"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              placeholder="아이디를 입력하세요"
+            />
+          </div>
           <div className="input-group">
             <label htmlFor="email" className="input-label">이메일</label>
             <input

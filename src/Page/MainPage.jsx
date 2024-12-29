@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './MainPage.css'
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
@@ -7,6 +8,11 @@ import 'slick-carousel/slick/slick-theme.css';
 function Main() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const sliderRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleStartClick = () => {
+    navigate('/audioCreate');
+  };
 
   const settings = {
     dots: true,
@@ -22,7 +28,7 @@ function Main() {
     beforeChange: (current, next) => setCurrentSlide(next),
   };
 
-  const boxes = [...Array(20)].map((_, index) => ({
+  const boxes = [...Array(5)].map((_, index) => ({
     id: index,
     text: (index % 5) + 1,
   }));
@@ -38,7 +44,7 @@ function Main() {
         </div>
         <div className="banner-overlay">
           <h1 className="banner-title">AudioArt</h1>
-          <button className="start-button">지금 시작하기</button>
+          <button className="start-button" onClick={handleStartClick}>지금 시작하기</button>
         </div>
       </section>
 
