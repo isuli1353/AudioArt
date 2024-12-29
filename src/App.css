@@ -1,0 +1,11 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #696969;
+}
+body::-webkit-scrollbar{
+  display:none;
+}
+.App {
+  text-align: center;
+}

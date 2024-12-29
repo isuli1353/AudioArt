@@ -1,0 +1,36 @@
+.footer {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ padding: 20px;
+ background-color: #312D2D;
+ color: #fdfdfd;
+ font-size: 1rem;
+ position: relative;
+ bottom: 0;
+ width: 98%;
+}
+
+.footer .footer-left,
+.footer .footer-right {
+ display: flex;
+ align-items: center;
+}
+
+.footer .footer-left {
+ font-size: 0.9rem;
+}
+
+.footer .footer-right {
+ gap: 20px;
+}
+
+.footer .footer-link {
+ text-decoration: none;
+ color: #fdfdfd;
+ font-size: 1.2rem;
+}
+
+.footer .footer-link:hover {
+ color: #007bff;
+}
