@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './SignupPage.css';
 
 function SignupPage() {
-  const [id, setId] = useState('');  // id 상태 추가
+  const [id, setId] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
