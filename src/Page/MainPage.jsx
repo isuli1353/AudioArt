@@ -35,7 +35,6 @@ function Main() {
 
   return (
     <div>
-      {/* 배너 섹션 */}
       <section className="banner">
         <div className="banner-video-container">
           <video className="banner-video" autoPlay loop muted>
@@ -48,7 +47,6 @@ function Main() {
         </div>
       </section>
 
-      {/* 스크롤 박스 섹션 */}
       <section className="scrolling-boxes">
         <Slider ref={sliderRef} {...settings}>
           {boxes.map((box) => (

@@ -1,61 +1,106 @@
 import React, { useState } from 'react';
-import './LoginPage.css';
+import { TextField, Button, Box, Typography, Paper, Link } from '@mui/material';
 
 function LoginPage() {
-  const [id, setId] = useState('');  // id 상태 추가
-  const [email, setEmail] = useState('');
+  const [id, setId] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Logging in with:', id, email, password);
+    if (!id || !password) {
+      setErrorMessage('아이디와 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+    console.log('Login : ', id, password);
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <h2 className="login-title">로그인</h2>
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="input-group">
-            <label htmlFor="id" className="input-label">아이디</label>
-            <input
-              type="text"
-              id="id"
-              className="input-field"
-              value={id}
-              onChange={(e) => setId(e.target.value)}
-              placeholder="아이디를 입력하세요"
-            />
-          </div>
-          <div className="input-group">
-            <label htmlFor="email" className="input-label">이메일</label>
-            <input
-              type="email"
-              id="email"
-              className="input-field"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="이메일을 입력하세요"
-            />
-          </div>
-          <div className="input-group">
-            <label htmlFor="password" className="input-label">비밀번호</label>
-            <input
-              type="password"
-              id="password"
-              className="input-field"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="비밀번호를 입력하세요"
-            />
-          </div>
-          <button type="submit" className="submit-button">로그인</button>
-        </form>
-        <div className="signup-link">
-          <p>계정이 없으신가요? <a href="/signup">회원가입</a></p>
-        </div>
-      </div>
-    </div>
+    <Box
+      sx={{
+        backgroundColor: '#f0f0f0',
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          padding: 4,
+          borderRadius: 2,
+          width: 400,
+        }}
+      >
+        <Typography variant="h4" component="h2" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
+          로그인
+        </Typography> 
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+          }}
+        >
+          <TextField
+            label="아이디"
+            variant="outlined"
+            fullWidth
+            value={id}
+            onChange={(e) => setId(e.target.value)}
+            placeholder="아이디를 입력하세요"
+          />
+          <TextField
+            label="비밀번호"
+            type="password"
+            variant="outlined"
+            fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="비밀번호를 입력하세요"
+          />
+          {errorMessage && (
+            <Typography
+              variant="body2"
+              color="error"
+              sx={{
+                marginTop: -1,
+                marginBottom: -1,
+                fontSize: '0.9rem',
+              }}
+            >
+              {errorMessage}
+            </Typography>
+          )}
+          <Button
+            type="submit"
+            variant="contained"
+            fullWidth
+            sx={{
+              padding: 1.5,
+              fontSize: '1.2rem',
+            }}
+          >
+            로그인
+          </Button>
+        </Box>
+        <Typography
+          variant="body2"
+          align="center"
+          sx={{
+            marginTop: 2,
+          }}
+        >
+          계정이 없으신가요?{' '}
+          <Link href="/signup" underline="hover">
+            회원가입
+          </Link>
+        </Typography>
+      </Paper>
+    </Box>
   );
 }
 

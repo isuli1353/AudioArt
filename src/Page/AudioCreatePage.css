@@ -1,7 +1,6 @@
 .container {
  display: flex;
  height: 100vh;
- background-color: #000;
 }
 
 .left-panel {
@@ -24,8 +23,9 @@
 
 .center-panel {
  flex-grow: 1;
+ width: 500;
+ height: 600;
  background-color: #000;
- padding: 20px;
  overflow: auto;
  color: #fff;
 }
@@ -37,6 +37,7 @@
 }
 
 .setting {
+ margin-top: 20px;
  margin-bottom: 20px;
 }
 
