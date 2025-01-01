@@ -10,6 +10,11 @@
  border-top-right-radius: 10px;
  border-bottom-right-radius: 10px;
  position: relative;
+ overflow-y: auto;
+}
+
+.left-panel::-webkit-scrollbar{
+ display:none;
 }
 
 .rotate-button {
@@ -34,6 +39,12 @@
  width: 250px;
  background-color: #fff;
  padding: 20px;
+ border-top-left-radius: 10px;
+ border-bottom-left-radius: 10px;
+}
+
+label {
+ font-weight: bold;
 }
 
 .setting {
@@ -41,10 +52,9 @@
  margin-bottom: 20px;
 }
 
-.setting label {
+.setting {
  display: block;
  text-align: left;
- font-weight: bold;
 }
 
 .option {

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './MainPage.css'
 import Slider from 'react-slick';
@@ -6,7 +6,6 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
 function Main() {
-  const [currentSlide, setCurrentSlide] = useState(0);
   const sliderRef = useRef(null);
   const navigate = useNavigate();
 
@@ -25,7 +24,6 @@ function Main() {
     cssEase: "linear",
     centerMode: true,
     centerPadding: '40px',
-    beforeChange: (current, next) => setCurrentSlide(next),
   };
 
   const boxes = [...Array(5)].map((_, index) => ({
