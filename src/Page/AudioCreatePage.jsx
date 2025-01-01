@@ -24,8 +24,7 @@ function AudioCreatePage() {
 
   const [useGradient, setUseGradient] = useState(false); // 그라데이션 사용 여부
   const [gradientDirection, setGradientDirection] = useState('horizontal'); // 그라데이션 방향 설정
-
-  const getGradientCoordinates = (canvas) => {
+  const getGradientCoordinates = (canvas) => { // 그라데이션 방향에 맞게 배치
     switch (gradientDirection) {
       case 'horizontal':
         return [0, canvas.height / 2, canvas.width, canvas.height / 2]; // 가로선
@@ -40,7 +39,8 @@ function AudioCreatePage() {
     }
   };
   
-
+  const [recorder, setRecorder] = useState(null);
+  const [recording, setRecording] = useState(false);
 
   // circle 세부설정
   const [circleSettings, setCircleSettings] = useState({
@@ -266,6 +266,55 @@ function AudioCreatePage() {
     }
   }, [audioContext, analyser, visualizationType, barColor, gradientColor, gradientDirection, useGradient, circleSettings, dotsSettings, spiralSettings]);
 
+  const handleRecording = () => {
+    if (recording) {
+      recorder.stop(); // 녹화 중지
+      setRecording(false);
+    } else {
+      const canvas = canvasRef.current;
+      const audioElement = audioElmRef.current;
+  
+      // 캔버스와 오디오 스트림 가져오기
+      const canvasStream = canvas.captureStream(60); // 캔버스에서 30fps로 스트리밍
+      const audioStream = audioElement.captureStream(); // 오디오 스트리밍
+  
+      // 비디오와 오디오 스트림 합치기
+      const mixedStream = new MediaStream([
+        ...canvasStream.getTracks(),
+        ...audioStream.getTracks(),
+      ]);
+  
+      // MediaRecorder 생성
+      const mediaRecorder = new MediaRecorder(mixedStream, {
+        mimeType: 'video/webm; codecs=vp8', // 코덱
+        videoBitsPerSecond: 3000000, // 비트레이트
+      });      
+
+      const recordedChunks = [];
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunks.push(event.data);
+        }
+      };
+  
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'AudioArt.webm';
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+  
+      // 녹화 시작
+      mediaRecorder.start();
+      setRecorder(mediaRecorder);
+      setRecording(true);
+    }
+  };
+
+  
   return (
     <div className="container" style={{ backgroundColor: backgroundColor }} >
       <div className="left-panel">
@@ -302,6 +351,13 @@ function AudioCreatePage() {
             업로드
           </Button>
         </label>  
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleRecording}
+        >
+          {recording ? '녹화 중지' : '녹화 시작'}
+        </Button>
         <Button
           variant="contained"
           color="primary"

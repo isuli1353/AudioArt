@@ -136,7 +136,7 @@ function RightSetting({
             <label>Spiral Factor</label>
             <input
               type="range"
-              min="0.1"
+              min="0.3"
               max="5"
               step="0.1"
               value={spiralSettings.spiralFactor}
