@@ -44,28 +44,33 @@ function AudioCreatePage() {
 
   // circle 세부설정
   const [circleSettings, setCircleSettings] = useState({
-    radiusMultiplier: 8,
-    lineWidth: 3,
-    lineStyle: 'solid',
-    fullCircle: 8,
-    HighFrequency: 3,
-    MinFrequency: 1
+    radiusMultiplier: 8, // 원 반지름
+    lineWidth: 3,        // 라인 두께
+    lineStyle: 'solid',  // 라인 스타일
+    fullCircle: 8,       // 겹치기
+    HighFrequency: 3,    // 높은음 감지
+    MinFrequency: 1      // 낮은음 감지
   });
   // dots 세부설정
   const [dotsSettings, setDotsSettings] = useState({
-    Degree: 200,
-    Radius: 100,
-    DotsNumber: 100,
-    DotsSize: 3,
-    layoutType: 'circle'
+    Degree: 200,      // 중심점으로 부터 떨어지는 거리
+    Radius: 100,      // 반지름
+    DotsNumber: 100,  // 점 갯수
+    DotsSize: 3,      // 점 사이즈
   });
   // spiral 세부설정
   const [spiralSettings, setSpiralSettings] = useState({
-    spiralFactor: 1,
-    angleIncrement: 0.1,
-    barHeightFactor: 3,
-    minBarRadius: 2,
-    showWhenNoSound: true,
+    spiralFactor: 1,        // 퍼짐의 정도
+    angleIncrement: 0.1,    // 나선 각도
+    barHeightFactor: 3,     // 소리에 대한 민감도
+    minBarRadius: 2,        // ?
+    showWhenNoSound: true,  // 소리가 없을 때 표시 여부
+  });
+  // Downlad 설정
+  const [downloadSettings, setDownloadSettings] = useState({
+    name: 'AudioArt',
+    frameRate: 60,       // 녹화 프레임
+    fileFormat: 'webm',  // 추출 파일 형식
   });
   
   // 뒤로가기
@@ -73,6 +78,7 @@ function AudioCreatePage() {
     navigate(-1);
   };
 
+  // 파일 업로드
   const onFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -114,13 +120,11 @@ function AudioCreatePage() {
         const mixedDataArray = [];
         const halfLength = Math.floor(bufferLength / 2);
   
-        // 낮은 음과 높은 음을 번갈아 섞음
+        // 낮은 음과 높은 음을 번갈아서
         for (let i = 0; i < halfLength; i++) {
           mixedDataArray.push(dataArray[i]);
           mixedDataArray.push(dataArray[bufferLength - 1 - i]);
         }
-  
-        // bufferLength가 홀수일 경우 마지막 값 추가
         if (bufferLength % 2 !== 0) {
           mixedDataArray.push(dataArray[halfLength]);
         }
@@ -132,13 +136,20 @@ function AudioCreatePage() {
         analyser.getByteFrequencyData(dataArray);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
   
-        const mixedDataArray = mixDataArray(); // 데이터 섞기 한 번만 실행
+        const mixedDataArray = mixDataArray();
   
         // 원형 스펙트럼 시각화
         if (visualizationType === 'circle') {
           const centerX = canvas.width / 2;
           const centerY = canvas.height / 2;
-          const radius = Math.min(canvas.width, canvas.height) / circleSettings.radiusMultiplier;
+
+          const {
+            radiusMultiplier,
+            MinFrequency,
+            HighFrequency
+          } = circleSettings
+
+          const radius = Math.min(canvas.width, canvas.height) / radiusMultiplier;
           const fullCircle = circleSettings.fullCircle * Math.PI;
   
           const adjustIntensity = (value, index, total) => {
@@ -146,20 +157,17 @@ function AudioCreatePage() {
   
             // 높은 주파수 낮은 주파수 섞기
             if (index < frequencyRange) {
-              return (Math.sqrt(value) / 255) * radius * circleSettings.MinFrequency;
+              return (Math.sqrt(value) / 255) * radius * MinFrequency;
             } else {
-              return (value / 255) * radius * circleSettings.HighFrequency;
+              return (value / 255) * radius * HighFrequency;
             }
           };
-  
+          
+          // 소리가 없을때 최소 두께 
           const minimumHeight = 3;
-  
-          // 기본값 설정 (소리가 없을 때에도 최소한의 반응을 유지)
           for (let i = 0; i < mixedDataArray.length; i++) {
             const angle = (i / mixedDataArray.length) * fullCircle;
             let barHeight = adjustIntensity(mixedDataArray[i], i, mixedDataArray.length);
-  
-            // 소리가 없을 때 최소한의 높이를 설정
             if (barHeight < minimumHeight) {
               barHeight = minimumHeight;
             }
@@ -191,7 +199,7 @@ function AudioCreatePage() {
           const centerY = canvas.height / 2;
           const { Degree, DotsNumber, Radius, DotsSize } = dotsSettings;
   
-          // 점 위치 계산 함수
+          // 점 위치 계산
           const calculatePosition = (index, value) => {
             const angle = (index / DotsNumber) * 2 * Math.PI;
             const radius = Math.max((value / 255) * Degree, Radius);
@@ -217,8 +225,7 @@ function AudioCreatePage() {
         else if (visualizationType === 'spiral') {
           const centerX = canvas.width / 2;
           const centerY = canvas.height / 2;
-  
-          // 설정 값 가져오기
+        
           const {
             spiralFactor,
             angleIncrement,
@@ -226,34 +233,47 @@ function AudioCreatePage() {
             minBarRadius,
             showWhenNoSound,
           } = spiralSettings;
-  
-          // 그라데이션 설정
-          const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        
+          // 그라데이션 방향 설정
+          const gradientCoordinates = getGradientCoordinates(canvas);
+          const gradient = ctx.createLinearGradient(...gradientCoordinates);
           gradient.addColorStop(0, gradientColor.start);
           gradient.addColorStop(1, gradientColor.end);
-  
+        
+          const getStrokeStyle = () => (useGradient ? gradient : barColor);
+        
           for (let i = 0; i < bufferLength; i++) {
             const angle = i * angleIncrement; // 나선의 각도
-            const radius = i * spiralFactor + minBarRadius; // 반지름 증가
+            const radius = i * spiralFactor + minBarRadius; // 반지름
             const barHeight = (dataArray[i] / 255) * (i / barHeightFactor); // 막대 높이
-  
+        
             // 소리가 없을 때 (barHeight가 너무 낮을 때) 표시 여부 결정
             if (barHeight > 0 || showWhenNoSound) {
               const x = centerX + Math.cos(angle) * radius;
               const y = centerY + Math.sin(angle) * radius;
-  
-              // 그라데이션
-              ctx.fillStyle = useGradient ? gradient : barColor;
+        
+              // 스타일 적용
+              ctx.fillStyle = getStrokeStyle();
               ctx.beginPath();
               ctx.arc(x, y, Math.max(barHeight / 10, 1), 0, 2 * Math.PI);
               ctx.fill();
             }
           }
         }
+        
         requestAnimationFrame(draw);
       };
       draw();
     }
+  };
+
+  // 다운로드 설정 변경
+  const handleDownloadSettingChange = (e) => {
+    const { name, value } = e.target;
+    setDownloadSettings((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
   
 
@@ -275,7 +295,7 @@ function AudioCreatePage() {
       const audioElement = audioElmRef.current;
   
       // 캔버스와 오디오 스트림 가져오기
-      const canvasStream = canvas.captureStream(60); // 캔버스에서 30fps로 스트리밍
+      const canvasStream = canvas.captureStream(downloadSettings.frameRate); // 프레임
       const audioStream = audioElement.captureStream(); // 오디오 스트리밍
   
       // 비디오와 오디오 스트림 합치기
@@ -286,7 +306,7 @@ function AudioCreatePage() {
   
       // MediaRecorder 생성
       const mediaRecorder = new MediaRecorder(mixedStream, {
-        mimeType: 'video/webm; codecs=vp8', // 코덱
+        mimeType: `video/${downloadSettings.fileFormat}; codecs=vp8`, // 코덱
         videoBitsPerSecond: 3000000, // 비트레이트
       });      
 
@@ -298,11 +318,11 @@ function AudioCreatePage() {
       };
   
       mediaRecorder.onstop = () => {
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const blob = new Blob(recordedChunks, { type: `video/${downloadSettings.fileFormat}` });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'AudioArt.webm';
+        a.download = `${downloadSettings.name}.${downloadSettings.fileFormat}`;
         a.click();
         URL.revokeObjectURL(url);
       };
@@ -334,6 +354,45 @@ function AudioCreatePage() {
           gradientDirection={gradientDirection}
           setGradientDirection={setGradientDirection}
         />
+        <div className="setting">
+          <label>Download Settings</label>
+          <hr />
+          <div className="option">
+            <label>Frame Rate</label>
+            <select
+              name="frameRate"
+              value={downloadSettings.frameRate}
+              onChange={handleDownloadSettingChange}
+            >
+              <option value={15}>15 fps</option>
+              <option value={30}>30 fps</option>
+              <option value={60}>60 fps</option>
+            </select>
+          </div>
+          <div className="option">
+            <label>File Format</label>
+            <select
+              name="fileFormat"
+              value={downloadSettings.fileFormat}
+              onChange={handleDownloadSettingChange}
+            >
+              <option value="webm">webm</option>
+              <option value="mp4">mp4</option>
+            </select>
+          </div>
+          <div className="option">
+          <label>File Name</label>
+          <input
+            type="text"
+            name="name"
+            value={downloadSettings.name}
+            onChange={handleDownloadSettingChange}
+            placeholder="Enter file name"
+          />
+        </div>
+        </div>
+        <label>Audio</label>
+        <hr />
         <audio src={audioFile ?? ""} controls ref={audioElmRef} />
           <input
           type="file"
@@ -358,14 +417,6 @@ function AudioCreatePage() {
         >
           {recording ? '녹화 중지' : '녹화 시작'}
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          component="span"
-        >
-          다운로드
-        </Button>
-        
       </div>
 
       <div className="center-panel" style={{ backgroundColor: backgroundColor }} >
