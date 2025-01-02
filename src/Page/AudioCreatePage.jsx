@@ -1,29 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from "@mui/material";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation  } from 'react-router-dom';
 import RightSetting from '../Components/RightSetting';
 import LeftSetting from '../Components/LeftSetting';
 import './AudioCreatePage.css';
 
 function AudioCreatePage() {
   const navigate = useNavigate();
-  const [audioFile, setAudioFile] = useState(null);
-  const [audioContext, setAudioContext] = useState(null);
-  const [analyser, setAnalyser] = useState(null);
-  const [visualizationType, setVisualizationType] = useState('circle'); // 시각화 타입
+  const location = useLocation();
+  const { settings } = location.state || {}; // 설정 받아오기
+
+  const [audioFile, setAudioFile] = useState(null);       // 업로드된 오디오 파일
+  const [audioContext, setAudioContext] = useState(null); // 오디오 파일
+  const [analyser, setAnalyser] = useState(null);         // 오디오 분석
+  const [visualizationType, setVisualizationType] = useState(settings?.visualizationType || 'circle'); // 시각화 타입
   
   const canvasRef = useRef(null);
   const audioElmRef = useRef(null);
 
   const [backgroundColor, setBackgroundColor] = useState('#000');  // 배경색상
-  const [barColor, setBarColor] = useState('#ffffff'); // 단색
-  const [gradientColor, setGradientColor] = useState({   // 그라데이션 색상
+  const [barColor, setBarColor] = useState('#ffffff');             // 단색 색상
+
+  const [useGradient, setUseGradient] = useState(settings?.useGradient || false);  // 그라데이션 사용 여부
+  const [gradientColor, setGradientColor] = useState(settings?.gradientColor || {  // 그라데이션 색상
     start: '#ff0000',
     end: '#0000ff',
   });
-
-  const [useGradient, setUseGradient] = useState(false); // 그라데이션 사용 여부
-  const [gradientDirection, setGradientDirection] = useState('horizontal'); // 그라데이션 방향 설정
+  const [gradientDirection, setGradientDirection] = useState(settings?.gradientDirection || 'horizontal'); // 그라데이션 방향 설정
   const getGradientCoordinates = (canvas) => { // 그라데이션 방향에 맞게 배치
     switch (gradientDirection) {
       case 'horizontal':
@@ -39,11 +42,11 @@ function AudioCreatePage() {
     }
   };
   
-  const [recorder, setRecorder] = useState(null);
-  const [recording, setRecording] = useState(false);
+  const [recorder, setRecorder] = useState(null);    // 녹화 객체
+  const [recording, setRecording] = useState(false); // 녹화중 상태
 
   // circle 세부설정
-  const [circleSettings, setCircleSettings] = useState({
+  const [circleSettings, setCircleSettings] = useState(settings?.circleSettings || {
     radiusMultiplier: 8, // 원 반지름
     lineWidth: 3,        // 라인 두께
     lineStyle: 'solid',  // 라인 스타일
@@ -52,23 +55,23 @@ function AudioCreatePage() {
     MinFrequency: 1      // 낮은음 감지
   });
   // dots 세부설정
-  const [dotsSettings, setDotsSettings] = useState({
-    Degree: 200,      // 중심점으로 부터 떨어지는 거리
+  const [dotsSettings, setDotsSettings] = useState(settings?.dotsSettings || {
+    Degree: 200,      // 중심점으로 부터 떨어진 거리
     Radius: 100,      // 반지름
     DotsNumber: 100,  // 점 갯수
     DotsSize: 3,      // 점 사이즈
   });
   // spiral 세부설정
-  const [spiralSettings, setSpiralSettings] = useState({
+  const [spiralSettings, setSpiralSettings] = useState(settings?.spiralSettings || {
     spiralFactor: 1,        // 퍼짐의 정도
     angleIncrement: 0.1,    // 나선 각도
     barHeightFactor: 3,     // 소리에 대한 민감도
-    minBarRadius: 2,        // ?
     showWhenNoSound: true,  // 소리가 없을 때 표시 여부
   });
+
   // Downlad 설정
   const [downloadSettings, setDownloadSettings] = useState({
-    name: 'AudioArt',
+    name: 'AudioArt',    // 녹화 파일 이름
     frameRate: 60,       // 녹화 프레임
     fileFormat: 'webm',  // 추출 파일 형식
   });
@@ -85,6 +88,7 @@ function AudioCreatePage() {
     setAudioFile(URL.createObjectURL(file));
     audioAnalyzer();
   };
+
 
   const audioAnalyzer = () => {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -112,7 +116,7 @@ function AudioCreatePage() {
       const gradient = ctx.createLinearGradient(...gradientCoordinates);
       gradient.addColorStop(0, gradientColor.start);
       gradient.addColorStop(1, gradientColor.end);
-  
+      
       const getStrokeStyle = () => useGradient ? gradient : barColor;
   
       // 데이터 섞기
@@ -131,7 +135,8 @@ function AudioCreatePage() {
   
         return mixedDataArray;
       };
-  
+      
+      // 그리기
       const draw = () => {
         analyser.getByteFrequencyData(dataArray);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -143,19 +148,15 @@ function AudioCreatePage() {
           const centerX = canvas.width / 2;
           const centerY = canvas.height / 2;
 
-          const {
-            radiusMultiplier,
-            MinFrequency,
-            HighFrequency
-          } = circleSettings
+          const { radiusMultiplier, MinFrequency, HighFrequency } = circleSettings;
 
           const radius = Math.min(canvas.width, canvas.height) / radiusMultiplier;
           const fullCircle = circleSettings.fullCircle * Math.PI;
-  
+          
+          // 높은 주파수 낮은 주파수 감지 강도
           const adjustIntensity = (value, index, total) => {
             const frequencyRange = total / 2;
-  
-            // 높은 주파수 낮은 주파수 섞기
+
             if (index < frequencyRange) {
               return (Math.sqrt(value) / 255) * radius * MinFrequency;
             } else {
@@ -163,7 +164,7 @@ function AudioCreatePage() {
             }
           };
           
-          // 소리가 없을때 최소 두께 
+          // 소리가 없을때의 최소 두께 
           const minimumHeight = 3;
           for (let i = 0; i < mixedDataArray.length; i++) {
             const angle = (i / mixedDataArray.length) * fullCircle;
@@ -226,13 +227,7 @@ function AudioCreatePage() {
           const centerX = canvas.width / 2;
           const centerY = canvas.height / 2;
         
-          const {
-            spiralFactor,
-            angleIncrement,
-            barHeightFactor,
-            minBarRadius,
-            showWhenNoSound,
-          } = spiralSettings;
+          const { spiralFactor, angleIncrement, barHeightFactor, showWhenNoSound } = spiralSettings;
         
           // 그라데이션 방향 설정
           const gradientCoordinates = getGradientCoordinates(canvas);
@@ -244,7 +239,7 @@ function AudioCreatePage() {
         
           for (let i = 0; i < bufferLength; i++) {
             const angle = i * angleIncrement; // 나선의 각도
-            const radius = i * spiralFactor + minBarRadius; // 반지름
+            const radius = i * spiralFactor + 2; // 반지름
             const barHeight = (dataArray[i] / 255) * (i / barHeightFactor); // 막대 높이
         
             // 소리가 없을 때 (barHeight가 너무 낮을 때) 표시 여부 결정
@@ -381,15 +376,22 @@ function AudioCreatePage() {
             </select>
           </div>
           <div className="option">
-          <label>File Name</label>
-          <input
-            type="text"
-            name="name"
-            value={downloadSettings.name}
-            onChange={handleDownloadSettingChange}
-            placeholder="Enter file name"
-          />
-        </div>
+            <label>File Name</label>
+            <input
+              type="text"
+              name="name"
+              value={downloadSettings.name}
+              onChange={handleDownloadSettingChange}
+              placeholder="Enter file name"
+            />
+          </div>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleRecording}
+          >
+            {recording ? '녹화 중지' : '녹화 시작'}
+          </Button>
         </div>
         <label>Audio</label>
         <hr />
@@ -409,14 +411,7 @@ function AudioCreatePage() {
           >
             업로드
           </Button>
-        </label>  
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleRecording}
-        >
-          {recording ? '녹화 중지' : '녹화 시작'}
-        </Button>
+        </label>
       </div>
 
       <div className="center-panel" style={{ backgroundColor: backgroundColor }} >

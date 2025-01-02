@@ -37,10 +37,12 @@
 }
 
 .scrolling-boxes {
- margin: 20px 0;
- padding: 20px 0;
+ margin: 20px 0 0 0;
 }
 .scroll-box {
+ width: 100px;
+ height: 250px;
+ padding: 12px 0;
  display: flex;
  justify-content: center;
  align-items: center;
@@ -53,9 +55,10 @@
  z-index: 1;
 }
 .scroll-image {
- width: 250px;
- height: auto;
+ width: 230px;
+ height: 230px;
  border-radius: 8px;
+ background-color: #007bff;
 }
 .scroll-box:focus {
  outline: none;

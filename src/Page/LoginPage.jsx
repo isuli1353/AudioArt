@@ -7,7 +7,7 @@ function LoginPage({ setIsLogin }) {
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -23,7 +23,7 @@ function LoginPage({ setIsLogin }) {
       setIsLogin(true);
       navigate('/');
     } catch (error) {
-      setErrorMessage('아이디나 비밀번호가 잘못되었습니다.');
+      setErrorMessage('로그인에 실패했습니다. 아이디나 비밀번호를 확인해주세요.');
     }
   };
 

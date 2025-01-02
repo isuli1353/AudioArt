@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Paper, Link } from '@mui/material';
 import { signupUser } from '../Api/api';
+import { useNavigate } from 'react-router-dom';
 
 function SignupPage() {
   const [id, setId] = useState('');
@@ -9,23 +10,25 @@ function SignupPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
 
+  const navigate = useNavigate();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!id || !email || !password || !confirmPassword) {
       setErrorMessage('모든 요소를 입력해주세요.');
       return;
-    } 
+    }
     if (password !== confirmPassword) {
       setErrorMessage('비밀번호가 일치하지 않습니다.');
       return;
     }
 
     try {
-      const newUser = await signupUser(id, email, password);
-      console.log('Signup successful:', newUser);
+      await signupUser(id, email, password);
+      navigate('/login');
     } catch (error) {
-      setErrorMessage('회원가입 중 오류가 발생했습니다.');
+      setErrorMessage('회원가입에 실패했습니다. 다시 시도해주세요.');
     }
   };
 

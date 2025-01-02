@@ -173,17 +173,18 @@ function RightSetting({
               }
             />
           </div>
-          <Checkbox
-  checked={spiralSettings.showWhenNoSound}
-  onChange={(e) => {
-    setSpiralSettings({
-      ...spiralSettings,
-      showWhenNoSound: e.target.checked,
-    });
-  }}
-  label="소리가 없을 때 시각화 표시"
- />
-
+          <div className="option">
+            <label>Silent Indicator</label>
+            <Checkbox
+              checked={spiralSettings.showWhenNoSound}
+              onChange={(e) => {
+                setSpiralSettings({
+                  ...spiralSettings,
+                  showWhenNoSound: e.target.checked,
+                });
+              }}
+            />
+          </div>
         </>
       )}
     </div>
